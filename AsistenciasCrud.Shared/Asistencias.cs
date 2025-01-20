@@ -18,6 +18,6 @@ namespace AsistenciasCrud.Shared
 
         public DateOnly Fecha { get; set; }
 
-        public Usuarios? UsuarioObj { get; set; }
+        public Usuarios? Usuario { get; set; }
     }
 }

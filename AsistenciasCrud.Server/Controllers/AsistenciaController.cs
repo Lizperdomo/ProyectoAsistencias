@@ -20,7 +20,6 @@ namespace AsistenciasCrud.Server.Controllers
 
         [HttpGet]
         [Route("Mostrar")]
-
         public async Task<IActionResult> Mostrar()
         {
             var responseApi = new ResponseAPI<List<Asistencia>>();
@@ -28,7 +27,11 @@ namespace AsistenciasCrud.Server.Controllers
 
             try
             {
-                foreach (var item in await _dbContext.Asistencias.Include(u => u.IdUsuarioNavigation).ToListAsync())
+                var asistencias = await _dbContext.Asistencias
+                    .Include(a => a.Usuario)
+                    .ToListAsync();
+
+                foreach (var item in asistencias)
                 {
                     listaAsistencia.Add(new Asistencia
                     {
@@ -37,17 +40,16 @@ namespace AsistenciasCrud.Server.Controllers
                         HoraEntrada = item.HoraEntrada,
                         HoraSalida = item.HoraSalida,
                         Fecha = item.Fecha,
-                        UsuarioObj = new Usuario
+                        Usuario = new Usuario
                         {
-                            IdUsuario = item.IdUsuarioNavigation.IdUsuario,
-                            Nombre = item.IdUsuarioNavigation.Nombre,
+                            IdUsuario = item.Usuario.IdUsuario,
+                            Nombre = item.Usuario.Nombre,
                         }
                     });
                 }
 
                 responseApi.Correcto = true;
                 responseApi.Valor = listaAsistencia;
-
             }
             catch (Exception ex)
             {
@@ -56,6 +58,7 @@ namespace AsistenciasCrud.Server.Controllers
             }
             return Ok(responseApi);
         }
+
 
         [HttpGet]
         [Route("Buscar/{id}")]
