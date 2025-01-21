@@ -14,7 +14,7 @@ namespace AsistenciasCrud.Client.NewFolder
 
         public async Task<List<Asistencias>> Mostrar()
         {
-            var result = await _http.GetFromJsonAsync<ResponseAPI<List<Asistencias>>>("api/Asistencias/Mostrar");
+            var result = await _http.GetFromJsonAsync<ResponseAPI<List<Asistencias>>>("api/Usuario/Mostrar");
 
             if (result.Correcto)
                 return result.Valor;

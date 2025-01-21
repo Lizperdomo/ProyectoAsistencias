@@ -12,71 +12,72 @@
 <a class="btn btn-success btn-sm mb-3" href="asistencia">Agregar asistencia</a>
 
 <table class="table">
-	<thead>
-		<tr>
-			<th>IdUsuario</th>
-			<th>Hora de entrada</th>
-			<th>Hora de salida</th>
-			<th>Fecha</th>
-			<th></th>
-		</tr>
-	</thead>
-	<tbody>
-		@if (listaAsistencia == null)
-		{
-			<tr>
-				<td colspan="6" aling="center">
-					<img style="width:70px" src="https://media.tenor.com/On7kvXhzml4AAAAj/loading-gif.gif" />
-				</td>
-			</tr>
-		}
-		else
-		{
-			@foreach (var item in listaAsistencia)
-			{
-				<tr>
-					<td>@item.IdUsuario</td>
-					<td>@item.HoraEntrada</td>
-					<td>@item.HoraSalida</td>
-					<td>@item.Fecha</td>
-					<td>
-						<a class="btn btn-primary btn-sm" href="asistencia/@item.IdAsistencia">
-							<i class="oi oi-pencil"></i>
-						</a>
-						<button type="button" class="btn btn-danger btn ms-2" @onclick="(() => Eliminar(item.IdAsistencia))">
-							<i class="oi oi-trash"></i>
-						</button>
-					</td>
-				</tr>
-			}
-		}
-	</tbody>
+    <thead>
+        <tr>
+            <th>IdUsuario</th>
+            <th>Hora de entrada</th>
+            <th>Hora de salida</th>
+            <th>Fecha</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (listaAsistencia == null)
+        {
+            <tr>
+                <td colspan="6" align="center">
+                    <img style="width:70px" src="https://media.tenor.com/On7kvXhzml4AAAAj/loading-gif.gif" />
+                </td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in listaAsistencia)
+            {
+                <tr>
+                    <td>@item.IdUsuario</td>
+                    <td>@item.HoraEntrada.ToString("HH:mm")</td>
+                    <td>@item.HoraSalida.ToString("HH:mm")</td>
+                    <td>@item.Fecha.ToString("yyyy-MM-dd")</td>
+                    <td>
+                        <a class="btn btn-primary btn-sm" href="asistencia/@item.IdAsistencia">
+                            <i class="oi oi-pencil"></i>
+                        </a>
+                        <button type="button" class="btn btn-danger btn ms-2" @onclick="(() => Eliminar(item.IdAsistencia))">
+                            <i class="oi oi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
 </table>
+
 @code {
 
-	List<AsistenciasCrud.Shared.Asistencias>? listaAsistencia = null;
+    List<AsistenciasCrud.Shared.Asistencias>? listaAsistencia = null;
 
-	protected override async Task OnInitializedAsync()
-	{
-		listaAsistencia = await AsistenciaService.Mostrar();
-	}
+    protected override async Task OnInitializedAsync()
+    {
+        listaAsistencia = await AsistenciaService.Mostrar();
+    }
 
-	private async Task Eliminar(int id)
-	{
-		var resultado = await Swal.FireAsync(new SweetAlertOptions
-			{
-				Title = "Eliminar asistencia",
-				Text = "¿Deseas eliminar la asistencia seleccionada?",
-				Icon = SweetAlertIcon.Question,
-				ShowCancelButton = true
-			});
+    private async Task Eliminar(int id)
+    {
+        var resultado = await Swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Eliminar asistencia",
+                Text = "¿Deseas eliminar la asistencia seleccionada?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true
+            });
 
-		if (resultado.IsConfirmed)
-		{
-			var eliminado = await AsistenciaService.Eliminar(id);
+        if (resultado.IsConfirmed)
+        {
+            var eliminado = await AsistenciaService.Eliminar(id);
 
-			if (eliminado)
-				listaAsistencia = listaAsistencia!.FindAll(u => u.IdAsistencia != id);
-		}
-	}
+            if (eliminado)
+                listaAsistencia = listaAsistencia!.FindAll(u => u.IdAsistencia != id);
+        }
+    }
 }

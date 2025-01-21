@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using AsistenciasCrud.Server.Models;
 using AsistenciasCrud.Shared;
 using Microsoft.EntityFrameworkCore;
+using System.Dynamic;
 
 namespace AsistenciasCrud.Server.Controllers
 {
@@ -10,7 +11,6 @@ namespace AsistenciasCrud.Server.Controllers
     [ApiController]
     public class AsistenciaController : ControllerBase
     {
-
         private readonly RegistroasistenciaContext _dbContext;
 
         public AsistenciaController(RegistroasistenciaContext dbContext)
@@ -22,8 +22,8 @@ namespace AsistenciasCrud.Server.Controllers
         [Route("Mostrar")]
         public async Task<IActionResult> Mostrar()
         {
-            var responseApi = new ResponseAPI<List<Asistencia>>();
-            var listaAsistencia = new List<Asistencia>();
+            var responseApi = new ResponseAPI<List<dynamic>>(); 
+            var listaAsistencia = new List<dynamic>();
 
             try
             {
@@ -33,23 +33,23 @@ namespace AsistenciasCrud.Server.Controllers
 
                 foreach (var item in asistencias)
                 {
-                    listaAsistencia.Add(new Asistencia
+                    listaAsistencia.Add(new
                     {
-                        IdAsistencia = item.IdAsistencia,
-                        IdUsuario = item.IdUsuario,
-                        HoraEntrada = item.HoraEntrada,
-                        HoraSalida = item.HoraSalida,
-                        Fecha = item.Fecha,
-                        Usuario = new Usuario
+                        item.IdAsistencia,
+                        item.IdUsuario,
+                        HoraEntrada = item.HoraEntrada.ToString("HH:mm"),  
+                        HoraSalida = item.HoraSalida.ToString("HH:mm"),    
+                        Fecha = item.Fecha.ToString("yyyy-MM-dd"),         
+                        Usuario = new
                         {
-                            IdUsuario = item.Usuario.IdUsuario,
-                            Nombre = item.Usuario.Nombre,
+                            item.Usuario.IdUsuario,
+                            item.Usuario.Nombre
                         }
                     });
                 }
 
                 responseApi.Correcto = true;
-                responseApi.Valor = listaAsistencia;
+                responseApi.Valor = listaAsistencia;  
             }
             catch (Exception ex)
             {
@@ -59,29 +59,34 @@ namespace AsistenciasCrud.Server.Controllers
             return Ok(responseApi);
         }
 
-
         [HttpGet]
         [Route("Buscar/{id}")]
-
         public async Task<IActionResult> Buscar(int id)
         {
-            var responseApi = new ResponseAPI<Asistencia>();
-            var Asistencia = new Asistencia();
+            var responseApi = new ResponseAPI<dynamic>();  
+            dynamic asistenciaResponse = new ExpandoObject(); 
 
             try
             {
-                var dbAsistencia = await _dbContext.Asistencias.FirstOrDefaultAsync(x => x.IdAsistencia == id);
+                var dbAsistencia = await _dbContext.Asistencias
+                    .Include(a => a.Usuario)
+                    .FirstOrDefaultAsync(x => x.IdAsistencia == id);
 
                 if (dbAsistencia != null)
                 {
-                    Asistencia.IdAsistencia = dbAsistencia.IdAsistencia;
-                    Asistencia.IdUsuario = dbAsistencia.IdUsuario;
-                    Asistencia.HoraEntrada = dbAsistencia.HoraEntrada;
-                    Asistencia.HoraSalida = dbAsistencia.HoraSalida;
-                    Asistencia.Fecha = dbAsistencia.Fecha;
+                    asistenciaResponse.IdAsistencia = dbAsistencia.IdAsistencia;
+                    asistenciaResponse.IdUsuario = dbAsistencia.IdUsuario;
+                    asistenciaResponse.HoraEntrada = dbAsistencia.HoraEntrada.ToString("HH:mm");
+                    asistenciaResponse.HoraSalida = dbAsistencia.HoraSalida.ToString("HH:mm");
+                    asistenciaResponse.Fecha = dbAsistencia.Fecha.ToString("yyyy-MM-dd");
+                    asistenciaResponse.Usuario = new
+                    {
+                        dbAsistencia.Usuario.IdUsuario,
+                        dbAsistencia.Usuario.Nombre
+                    };
 
                     responseApi.Correcto = true;
-                    responseApi.Valor = Asistencia;
+                    responseApi.Valor = asistenciaResponse;
                 }
                 else
                 {
@@ -94,12 +99,12 @@ namespace AsistenciasCrud.Server.Controllers
                 responseApi.Correcto = false;
                 responseApi.Mensaje = ex.Message;
             }
+
             return Ok(responseApi);
         }
 
         [HttpPost]
         [Route("Agregar")]
-
         public async Task<IActionResult> Agregar(Asistencia asistencia)
         {
             var responseApi = new ResponseAPI<int>();
@@ -140,7 +145,6 @@ namespace AsistenciasCrud.Server.Controllers
 
         [HttpPut]
         [Route("Editar/{id}")]
-
         public async Task<IActionResult> Editar(Asistencia asistencia, int id)
         {
             var responseApi = new ResponseAPI<int>();
@@ -177,7 +181,6 @@ namespace AsistenciasCrud.Server.Controllers
 
         [HttpDelete]
         [Route("Eliminar/{id}")]
-
         public async Task<IActionResult> Eliminar(int id)
         {
             var responseApi = new ResponseAPI<int>();

@@ -1,0 +1,95 @@
+﻿@page "/asistencia"
+@page "/asistencia/{IdAsistencia:int}"
+
+@using AsistenciasCrud.Shared;
+@using AsistenciasCrud.Client.NewFolder;
+
+@inject IAsistenciaService asistenciaService;
+@inject IUsuarioService usuarioService;
+@inject NavigationManager navegacion;
+
+<h3>@titulo</h3>
+
+<EditForm Model="Asistencia" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Usuario</label>
+        <select class="form-control" @bind="asistencia.IdUsuario">
+            <option value="">Seleccione un Usuario</option>
+            @foreach (var usuario in usuarios)
+            {
+                <option value="@usuario.IdUsuario">@usuario.Nombre</option>
+            }
+        </select>
+        <ValidationMessage For="@(() => asistencia.IdUsuario)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Hora Entrada</label>
+        <input type="time" class="form-control" @bind="asistencia.HoraEntrada" />
+        <ValidationMessage For="@(() => asistencia.HoraEntrada)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Hora Salida</label>
+        <input type="time" class="form-control" @bind="asistencia.HoraSalida" />
+        <ValidationMessage For="@(() => asistencia.HoraSalida)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Fecha</label>
+        <InputDate class="form-control" @bind-Value="asistencia.Fecha" TValue="DateOnly" />
+        <ValidationMessage For="@(() => asistencia.Fecha)" />
+    </div>
+
+    <button class="btn btn-primary" type="submit">@botonTexto</button>
+    <a class="btn btn-secondary ms-2" href="/asistencias">Volver</a>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int IdAsistencia { get; set; } = 0;
+
+    private Asistencias asistencia = new Asistencias();
+    private List<Usuarios> usuarios = new List<Usuarios>();
+    private string titulo = "Nueva Asistencia";
+    private string botonTexto = "Guardar";
+
+    protected override async Task OnInitializedAsync()
+    {
+        usuarios = await usuarioService.Lista();
+
+        if (IdAsistencia != 0) 
+        {
+            asistencia = await asistenciaService.Buscar(IdAsistencia) ?? new Asistencias();
+            titulo = "Editar Asistencia";
+            botonTexto = "Actualizar";
+        }
+        else
+        {
+            asistencia.Fecha = DateOnly.FromDateTime(DateTime.Now);
+        }
+    }
+
+    private async Task OnValidSubmit()
+    {
+        if (IdAsistencia == 0) 
+        {
+            var idNuevo = await asistenciaService.Guardar(asistencia);
+            if (idNuevo != 0)
+            {
+                navegacion.NavigateTo("/asistencias");
+            }
+        }
+        else
+        {
+            var actualizado = await asistenciaService.Editar(IdAsistencia, asistencia);
+            if (actualizado != 0)
+            {
+                navegacion.NavigateTo("/asistencias");
+            }
+        }
+    }
+}

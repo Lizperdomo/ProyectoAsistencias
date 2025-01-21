@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using AsistenciasCrud.Server.Models;
 using AsistenciasCrud.Shared;
-using Microsoft.EntityFrameworkCore;
 
 namespace AsistenciasCrud.Server.Controllers
 {
@@ -10,7 +9,6 @@ namespace AsistenciasCrud.Server.Controllers
     [ApiController]
     public class UsuarioController : ControllerBase
     {
-
         private readonly RegistroasistenciaContext _dbContext;
 
         public UsuarioController(RegistroasistenciaContext dbContext)
@@ -18,189 +16,74 @@ namespace AsistenciasCrud.Server.Controllers
             _dbContext = dbContext;
         }
 
-        [HttpGet]
-        [Route("Mostrar")]
-
+        [HttpGet("Mostrar")]
         public async Task<IActionResult> Mostrar()
         {
-            var responseApi = new ResponseAPI<List<Usuario>>();
-            var listaUsuario = new List<Usuario>();
-
-            try
-            {
-                foreach (var item in await _dbContext.Usuarios.ToListAsync())
-                {
-                    listaUsuario.Add(new Usuario
-                    {
-                        IdUsuario = item.IdUsuario,
-                        Nombre = item.Nombre,
-                        ApellidoP = item.ApellidoP,
-                        ApellidoM = item.ApellidoM,
-                        Correo = item.Correo,
-                        Telefono = item.Telefono,
-                    });
-                }
-
-                responseApi.Correcto = true;
-                responseApi.Valor = listaUsuario;
-
-            }
-            catch (Exception ex)
-            {
-                responseApi.Correcto = false;
-                responseApi.Mensaje = ex.Message;
-            }
-            return Ok(responseApi);
+            var usuarios = await _dbContext.Usuarios.ToListAsync();
+            return Ok(usuarios);
         }
 
-        [HttpGet]
-        [Route("Buscar/{id}")]
-
+        [HttpGet("Buscar/{id}")]
         public async Task<IActionResult> Buscar(int id)
         {
-            var responseApi = new ResponseAPI<Usuario>();
-            var Usuario = new Usuario();
-
-            try
-            {
-                var dbUsuario = await _dbContext.Usuarios.FirstOrDefaultAsync(x => x.IdUsuario == id);
-
-                if (dbUsuario != null)
-                {
-                    Usuario.IdUsuario = dbUsuario.IdUsuario;
-                    Usuario.Nombre = dbUsuario.Nombre;
-                    Usuario.ApellidoP = dbUsuario.ApellidoP;
-                    Usuario.ApellidoM = dbUsuario.ApellidoM;
-                    Usuario.Correo = dbUsuario.Correo;
-                    Usuario.Telefono = dbUsuario.Telefono;
-
-                    responseApi.Correcto = true;
-                    responseApi.Valor = Usuario;
-                }
-                else
-                {
-                    responseApi.Correcto = false;
-                    responseApi.Mensaje = "Usuario no encontrada";
-                }
-            }
-            catch (Exception ex)
-            {
-                responseApi.Correcto = false;
-                responseApi.Mensaje = ex.Message;
-            }
-            return Ok(responseApi);
+            var usuario = await _dbContext.Usuarios.FindAsync(id);
+            if (usuario == null)
+                return NotFound("Usuario no encontrado.");
+            return Ok(usuario);
         }
 
-        [HttpPost]
-        [Route("Agregar")]
-
-        public async Task<IActionResult> Agregar(Usuario usuario)
+        [HttpPost("Guardar")]
+        public async Task<IActionResult> Guardar([FromBody] UsuariosDTP usuarioDto)
         {
-            var responseApi = new ResponseAPI<int>();
-            var Usuario = new Usuario();
+            if (!ModelState.IsValid)
+                return BadRequest("Modelo de usuario no válido.");
 
-            try
+            var usuario = new Usuarios
             {
-                var dbUsuario = new Usuario
-                {
-                    IdUsuario = usuario.IdUsuario,
-                    ApellidoP = usuario.ApellidoP,
-                    ApellidoM = usuario.ApellidoM,
-                    Correo = usuario.Correo,
-                    Telefono = usuario.Telefono,
-                };
+                Nombre = usuarioDto.Nombre,
+                ApellidoP = usuarioDto.ApellidoP,
+                ApellidoM = usuarioDto.ApellidoM,
+                Correo = usuarioDto.Correo,
+                Telefono = usuarioDto.Telefono
+            };
 
-                _dbContext.Usuarios.Add(dbUsuario);
-                await _dbContext.SaveChangesAsync();
-
-                if (dbUsuario.IdUsuario != 0)
-                {
-                    responseApi.Correcto = true;
-                    responseApi.Valor = dbUsuario.IdUsuario;
-                }
-                else
-                {
-                    responseApi.Correcto = false;
-                    responseApi.Mensaje = "Usuario no guardado";
-                }
-            }
-            catch (Exception ex)
-            {
-                responseApi.Correcto = false;
-                responseApi.Mensaje = ex.Message;
-            }
-            return Ok(responseApi);
+            _dbContext.Usuarios.Add(usuario);
+            await _dbContext.SaveChangesAsync();
+            return Ok(usuario.IdUsuario);
         }
 
-        [HttpPut]
-        [Route("Editar/{id}")]
 
-        public async Task<IActionResult> Editar(Usuario usuario, int id)
+        [HttpPut("Editar/{id}")]
+        public async Task<IActionResult> Editar(int id, [FromBody] Usuarios usuario)
         {
-            var responseApi = new ResponseAPI<int>();
+            if (!ModelState.IsValid)
+                return BadRequest("Modelo de usuario no válido.");
 
-            try
-            {
-                var dbUsuario = await _dbContext.Usuarios.FirstOrDefaultAsync(e => e.IdUsuario == id);
+            var dbUsuario = await _dbContext.Usuarios.FindAsync(id);
+            if (dbUsuario == null)
+                return NotFound("Usuario no encontrado.");
 
-                if (dbUsuario != null)
-                {
-                    dbUsuario.Nombre = usuario.Nombre;
-                    dbUsuario.ApellidoP = usuario.ApellidoP;
-                    dbUsuario.ApellidoM = usuario.ApellidoM;
-                    dbUsuario.Correo = usuario.Correo;
-                    dbUsuario.Telefono = usuario.Telefono;
+            dbUsuario.Nombre = usuario.Nombre;
+            dbUsuario.ApellidoP = usuario.ApellidoP;
+            dbUsuario.ApellidoM = usuario.ApellidoM;
+            dbUsuario.Correo = usuario.Correo;
+            dbUsuario.Telefono = usuario.Telefono;
 
-                    _dbContext.Usuarios.Update(dbUsuario);
-                    await _dbContext.SaveChangesAsync();
-
-                    responseApi.Correcto = true;
-                    responseApi.Valor = dbUsuario.IdUsuario;
-                }
-                else
-                {
-                    responseApi.Correcto = false;
-                    responseApi.Mensaje = "Usuario no encontrada";
-                }
-            }
-            catch (Exception ex)
-            {
-                responseApi.Correcto = false;
-                responseApi.Mensaje = ex.Message;
-            }
-            return Ok(responseApi);
+            _dbContext.Usuarios.Update(dbUsuario);
+            await _dbContext.SaveChangesAsync();
+            return Ok(dbUsuario.IdUsuario);
         }
 
-        [HttpDelete]
-        [Route("Eliminar/{id}")]
-
+        [HttpDelete("Eliminar/{id}")]
         public async Task<IActionResult> Eliminar(int id)
         {
-            var responseApi = new ResponseAPI<int>();
+            var usuario = await _dbContext.Usuarios.FindAsync(id);
+            if (usuario == null)
+                return NotFound("Usuario no encontrado.");
 
-            try
-            {
-                var dbUsuario = await _dbContext.Usuarios.FirstOrDefaultAsync(e => e.IdUsuario == id);
-
-                if (dbUsuario != null)
-                {
-                    _dbContext.Usuarios.Remove(dbUsuario);
-                    await _dbContext.SaveChangesAsync();
-
-                    responseApi.Correcto = true;
-                }
-                else
-                {
-                    responseApi.Correcto = false;
-                    responseApi.Mensaje = "Usuario no encontrada";
-                }
-            }
-            catch (Exception ex)
-            {
-                responseApi.Correcto = false;
-                responseApi.Mensaje = ex.Message;
-            }
-            return Ok(responseApi);
+            _dbContext.Usuarios.Remove(usuario);
+            await _dbContext.SaveChangesAsync();
+            return Ok("Usuario eliminado.");
         }
     }
 }

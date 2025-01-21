@@ -11,38 +11,41 @@ namespace AsistenciasCrud.Client.NewFolder
         {
             _http = http;
         }
+
         public async Task<List<Usuarios>> Mostrar()
         {
-            var result = await _http.GetFromJsonAsync<ResponseAPI<List<Usuarios>>>("api/Usuarios/Mostrar");
+            var result = await _http.GetFromJsonAsync<ResponseAPI<List<Usuarios>>>("api/Usuario/Mostrar");
 
             if (result.Correcto)
                 return result.Valor;
             else
                 throw new Exception(result.Mensaje);
         }
+
         public async Task<Usuarios> Buscar(int id)
         {
-            var result = await _http.GetFromJsonAsync<ResponseAPI<Usuarios>>($"api/Usuarios/Buscar/{id}");
+            var result = await _http.GetFromJsonAsync<ResponseAPI<Usuarios>>($"api/Usuario/Buscar/{id}");
 
             if (result.Correcto)
                 return result.Valor;
             else
                 throw new Exception(result.Mensaje);
         }
+
         public async Task<int> Guardar(Usuarios usuario)
         {
-            var result = await _http.PostAsJsonAsync("api/Usuarios/Guardar", usuario);
+            var result = await _http.PostAsJsonAsync("api/Usuario/Agregar", usuario);
             var response = await result.Content.ReadFromJsonAsync<ResponseAPI<int>>();
-            
+
             if (response.Correcto)
                 return response.Valor;
             else
                 throw new Exception(response.Mensaje);
         }
 
-        public async Task<int> Editar(Usuarios usuario)
+        public async Task<int> Editar(int id, Usuarios usuario)
         {
-            var result = await _http.PutAsJsonAsync($"api/Usuarios/Editar/{usuario.IdUsuario}", usuario);
+            var result = await _http.PutAsJsonAsync($"api/Usuario/Editar/{id}", usuario);
             var response = await result.Content.ReadFromJsonAsync<ResponseAPI<int>>();
 
             if (response.Correcto)
@@ -53,15 +56,13 @@ namespace AsistenciasCrud.Client.NewFolder
 
         public async Task<bool> Eliminar(int id)
         {
-            var result = await _http.DeleteAsync($"api/Usuarios/Eliminar/{id}");
+            var result = await _http.DeleteAsync($"api/Usuario/Eliminar/{id}");
             var response = await result.Content.ReadFromJsonAsync<ResponseAPI<int>>();
 
             if (response.Correcto)
-                return response.Correcto;
+                return true;
             else
                 throw new Exception(response.Mensaje);
         }
-
     }
 }
-
