@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AsistenciasCrud.Shared
 {
-    public class Usuarios
+    public class UsuariosDTO
     {
         public int IdUsuario { get; set; }
 
