@@ -1,0 +1,87 @@
+﻿@page "/usuarios"
+@page "/usuarios/{idUsuario:int}"
+
+@using AsistenciasCrud.Shared;
+@using AsistenciasCrud.Client.NewFolder;
+
+@inject IUsuarioService usuarioService;
+@inject NavigationManager navegacion;
+
+<h3>@titulo</h3>
+
+<EditForm Model="usuario" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <InputText class="form-control" @bind-Value="usuario.Nombre" />
+        <ValidationMessage For="@(() => usuario.Nombre)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Apellido Paterno</label>
+        <InputText class="form-control" @bind-Value="usuario.ApellidoP" />
+        <ValidationMessage For="@(() => usuario.ApellidoP)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Apellido Materno</label>
+        <InputText class="form-control" @bind-Value="usuario.ApellidoM" />
+        <ValidationMessage For="@(() => usuario.ApellidoM)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Correo</label>
+        <InputText class="form-control" @bind-Value="usuario.Correo" />
+        <ValidationMessage For="@(() => usuario.Correo)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Teléfono</label>
+        <InputText class="form-control" @bind-Value="usuario.Telefono" />
+        <ValidationMessage For="@(() => usuario.Telefono)" />
+    </div>
+
+    <button class="btn btn-primary" type="submit">@botonTexto</button>
+    <a class="btn btn-secondary ms-2" href="/usuarios">Volver</a>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int idUsuario { get; set; } = 0;
+
+    private UsuariosDTO usuario = new UsuariosDTO();
+    private string titulo = "Nuevo Usuario";
+    private string botonTexto = "Guardar";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (idUsuario != 0)
+        {
+            usuario = await usuarioService.Buscar(idUsuario) ?? new UsuariosDTO();
+            titulo = "Editar Usuario";
+            botonTexto = "Actualizar";
+        }
+    }
+
+    private async Task OnValidSubmit()
+    {
+        if (idUsuario == 0)
+        {
+            var idNuevo = await usuarioService.Guardar(usuario);
+            if (idNuevo != 0)
+            {
+                navegacion.NavigateTo("/usuarios");
+            }
+        }
+        else
+        {
+            var actualizado = await usuarioService.Editar(idUsuario, usuario);
+            if (actualizado != 0)
+            {
+                navegacion.NavigateTo("/usuarios");
+            }
+        }
+    }
+}

@@ -1,5 +1,5 @@
 ﻿@page "/asistencia"
-@page "/asistencia/{IdAsistencia:int}"
+@page "/asistencia/{idAsistencia:int}"
 
 @using AsistenciasCrud.Shared;
 @using AsistenciasCrud.Client.NewFolder;
@@ -10,38 +10,38 @@
 
 <h3>@titulo</h3>
 
-<EditForm Model="Asistencia" OnValidSubmit="OnValidSubmit">
+<EditForm Model="asistenciaDTO" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
     <div class="mb-3">
         <label class="form-label">Usuario</label>
-        <select class="form-control" @bind="asistencia.IdUsuario">
+        <select class="form-control" @bind="asistenciaDTO.IdUsuario">
             <option value="">Seleccione un Usuario</option>
             @foreach (var usuario in usuarios)
             {
                 <option value="@usuario.IdUsuario">@usuario.Nombre</option>
             }
         </select>
-        <ValidationMessage For="@(() => asistencia.IdUsuario)" />
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Hora Entrada</label>
-        <input type="time" class="form-control" @bind="asistencia.HoraEntrada" />
-        <ValidationMessage For="@(() => asistencia.HoraEntrada)" />
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Hora Salida</label>
-        <input type="time" class="form-control" @bind="asistencia.HoraSalida" />
-        <ValidationMessage For="@(() => asistencia.HoraSalida)" />
+        <ValidationMessage For="@(() => asistenciaDTO.IdUsuario)" />
     </div>
 
     <div class="mb-3">
         <label class="form-label">Fecha</label>
-        <InputDate class="form-control" @bind-Value="asistencia.Fecha" TValue="DateOnly" />
-        <ValidationMessage For="@(() => asistencia.Fecha)" />
+        <InputDate class="form-control" @bind-Value="asistenciaDTO.Fecha" TValue="DateOnly" />
+        <ValidationMessage For="@(() => asistenciaDTO.Fecha)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Hora Entrada</label>
+        <input type="time" class="form-control" @bind="asistenciaDTO.HoraEntrada" />
+        <ValidationMessage For="@(() => asistenciaDTO.HoraEntrada)" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Hora Salida</label>
+        <input type="time" class="form-control" @bind="asistenciaDTO.HoraSalida" />
+        <ValidationMessage For="@(() => asistenciaDTO.HoraSalida)" />
     </div>
 
     <button class="btn btn-primary" type="submit">@botonTexto</button>
@@ -50,34 +50,35 @@
 
 @code {
     [Parameter]
-    public int IdAsistencia { get; set; } = 0;
+    public int idAsistencia { get; set; } = 0;
 
-    private Asistencias asistencia = new Asistencias();
-    private List<Usuarios> usuarios = new List<Usuarios>();
+    private AsistenciaDTO asistenciaDTO = new AsistenciaDTO();
+    private List<UsuariosDTO> usuarios = new List<UsuariosDTO>();
     private string titulo = "Nueva Asistencia";
     private string botonTexto = "Guardar";
 
     protected override async Task OnInitializedAsync()
     {
-        usuarios = await usuarioService.Lista();
+        usuarios = await usuarioService.Mostrar();
 
-        if (IdAsistencia != 0) 
+        if (idAsistencia != 0)
         {
-            asistencia = await asistenciaService.Buscar(IdAsistencia) ?? new Asistencias();
+            var asistencia = await asistenciaService.Buscar(idAsistencia);
+            asistenciaDTO = ConvertirAAsistenciaDTO(asistencia);
             titulo = "Editar Asistencia";
             botonTexto = "Actualizar";
         }
         else
         {
-            asistencia.Fecha = DateOnly.FromDateTime(DateTime.Now);
+            asistenciaDTO.Fecha = DateOnly.FromDateTime(DateTime.Now);
         }
     }
 
     private async Task OnValidSubmit()
     {
-        if (IdAsistencia == 0) 
+        if (idAsistencia == 0)
         {
-            var idNuevo = await asistenciaService.Guardar(asistencia);
+            var idNuevo = await asistenciaService.Guardar(ConvertirAAsistencia(asistenciaDTO));
             if (idNuevo != 0)
             {
                 navegacion.NavigateTo("/asistencias");
@@ -85,11 +86,35 @@
         }
         else
         {
-            var actualizado = await asistenciaService.Editar(IdAsistencia, asistencia);
+            var actualizado = await asistenciaService.Editar(ConvertirAAsistencia(asistenciaDTO));
             if (actualizado != 0)
             {
                 navegacion.NavigateTo("/asistencias");
             }
         }
+    }
+
+    private Asistencias ConvertirAAsistencia(AsistenciaDTO dto)
+    {
+        return new Asistencias
+            {
+                IdAsistencia = dto.IdAsistencia,
+                IdUsuario = dto.IdUsuario,
+                Fecha = dto.Fecha,
+                HoraEntrada = dto.HoraEntrada,
+                HoraSalida = dto.HoraSalida
+            };
+    }
+
+    private AsistenciaDTO ConvertirAAsistenciaDTO(Asistencias asistencia)
+    {
+        return new AsistenciaDTO
+            {
+                IdAsistencia = asistencia.IdAsistencia,
+                IdUsuario = asistencia.IdUsuario,
+                Fecha = asistencia.Fecha,
+                HoraEntrada = asistencia.HoraEntrada,
+                HoraSalida = asistencia.HoraSalida
+            };
     }
 }

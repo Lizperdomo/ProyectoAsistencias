@@ -36,9 +36,9 @@
             {
                 <tr>
                     <td>@item.IdUsuario</td>
-                    <td>@item.HoraEntrada.ToString("HH:mm")</td>
-                    <td>@item.HoraSalida.ToString("HH:mm")</td>
-                    <td>@item.Fecha.ToString("yyyy-MM-dd")</td>
+                    <td>@item.HoraEntrada</td>
+                    <td>@item.HoraSalida</td>
+                    <td>@item.Fecha</td>
                     <td>
                         <a class="btn btn-primary btn-sm" href="asistencia/@item.IdAsistencia">
                             <i class="oi oi-pencil"></i>
@@ -54,7 +54,6 @@
 </table>
 
 @code {
-
     List<AsistenciasCrud.Shared.Asistencias>? listaAsistencia = null;
 
     protected override async Task OnInitializedAsync()
