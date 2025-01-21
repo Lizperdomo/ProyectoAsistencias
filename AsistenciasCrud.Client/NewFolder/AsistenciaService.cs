@@ -14,7 +14,7 @@ namespace AsistenciasCrud.Client.NewFolder
 
         public async Task<List<Asistencias>> Mostrar()
         {
-            var result = await _http.GetFromJsonAsync<ResponseAPI<List<Asistencias>>>("api/Usuario/Mostrar");
+            var result = await _http.GetFromJsonAsync<ResponseAPI<List<Asistencias>>>("api/Asistencia/Mostrar");
 
             if (result.Correcto)
                 return result.Valor;
@@ -24,16 +24,17 @@ namespace AsistenciasCrud.Client.NewFolder
 
         public async Task<Asistencias> Buscar(int id)
         {
-            var result = await _http.GetFromJsonAsync<ResponseAPI<Asistencias>>($"api/Asistencias/Buscar/{id}");
+            var result = await _http.GetFromJsonAsync<ResponseAPI<Asistencias>>($"api/Asistencia/Buscar/{id}");
 
             if (result.Correcto)
                 return result.Valor;
             else
                 throw new Exception(result.Mensaje);
         }
-        public async Task<int> Guardar(Asistencias asistencias)
+
+        public async Task<int> Guardar(Asistencias asistencia)
         {
-            var result = await _http.PostAsJsonAsync("api/Asistencias/Guardar", asistencias);
+            var result = await _http.PostAsJsonAsync("api/Asistencia/Agregar", asistencia);
             var response = await result.Content.ReadFromJsonAsync<ResponseAPI<int>>();
 
             if (response.Correcto)
@@ -42,9 +43,9 @@ namespace AsistenciasCrud.Client.NewFolder
                 throw new Exception(response.Mensaje);
         }
 
-        public async Task<int> Editar(Asistencias asistencias)
+        public async Task<int> Editar(Asistencias asistencia)
         {
-            var result = await _http.PutAsJsonAsync($"api/Asistencias/Editar/{asistencias.IdAsistencia}", asistencias);
+            var result = await _http.PutAsJsonAsync($"api/Asistencia/Editar/{asistencia.IdAsistencia}", asistencia);
             var response = await result.Content.ReadFromJsonAsync<ResponseAPI<int>>();
 
             if (response.Correcto)
@@ -55,7 +56,7 @@ namespace AsistenciasCrud.Client.NewFolder
 
         public async Task<bool> Eliminar(int id)
         {
-            var result = await _http.DeleteAsync($"api/Asistencias/Eliminar/{id}");
+            var result = await _http.DeleteAsync($"api/Asistencia/Eliminar/{id}");
             var response = await result.Content.ReadFromJsonAsync<ResponseAPI<int>>();
 
             if (response.Correcto)

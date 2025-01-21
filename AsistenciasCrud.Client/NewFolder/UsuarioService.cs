@@ -1,4 +1,5 @@
 ﻿using AsistenciasCrud.Shared;
+using System.Net.Http;
 using System.Net.Http.Json;
 
 namespace AsistenciasCrud.Client.NewFolder
@@ -12,9 +13,14 @@ namespace AsistenciasCrud.Client.NewFolder
             _http = http;
         }
 
-        public async Task<List<Usuarios>> Mostrar()
+        public async Task<List<UsuariosDTO>> Mostrar()
         {
-            var result = await _http.GetFromJsonAsync<ResponseAPI<List<Usuarios>>>("api/Usuario/Mostrar");
+            return await _http.GetFromJsonAsync<List<UsuariosDTO>>("api/Usuario/Mostrar");
+        }
+
+        public async Task<UsuariosDTO> Buscar(int id)
+        {
+            var result = await _http.GetFromJsonAsync<ResponseAPI<UsuariosDTO>>($"api/Usuario/Buscar/{id}");
 
             if (result.Correcto)
                 return result.Valor;
@@ -22,17 +28,7 @@ namespace AsistenciasCrud.Client.NewFolder
                 throw new Exception(result.Mensaje);
         }
 
-        public async Task<Usuarios> Buscar(int id)
-        {
-            var result = await _http.GetFromJsonAsync<ResponseAPI<Usuarios>>($"api/Usuario/Buscar/{id}");
-
-            if (result.Correcto)
-                return result.Valor;
-            else
-                throw new Exception(result.Mensaje);
-        }
-
-        public async Task<int> Guardar(Usuarios usuario)
+        public async Task<int> Guardar(UsuariosDTO usuario)
         {
             var result = await _http.PostAsJsonAsync("api/Usuario/Agregar", usuario);
             var response = await result.Content.ReadFromJsonAsync<ResponseAPI<int>>();
@@ -43,7 +39,7 @@ namespace AsistenciasCrud.Client.NewFolder
                 throw new Exception(response.Mensaje);
         }
 
-        public async Task<int> Editar(int id, Usuarios usuario)
+        public async Task<int> Editar(int id, UsuariosDTO usuario)
         {
             var result = await _http.PutAsJsonAsync($"api/Usuario/Editar/{id}", usuario);
             var response = await result.Content.ReadFromJsonAsync<ResponseAPI<int>>();
