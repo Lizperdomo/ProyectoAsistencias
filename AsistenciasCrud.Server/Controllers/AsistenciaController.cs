@@ -22,7 +22,7 @@ namespace AsistenciasCrud.Server.Controllers
         [Route("Mostrar")]
         public async Task<IActionResult> Mostrar()
         {
-            var responseApi = new ResponseAPI<List<dynamic>>(); 
+            var responseApi = new ResponseAPI<List<dynamic>>();
             var listaAsistencia = new List<dynamic>();
 
             try
@@ -37,9 +37,9 @@ namespace AsistenciasCrud.Server.Controllers
                     {
                         item.IdAsistencia,
                         item.IdUsuario,
-                        HoraEntrada = item.HoraEntrada.ToString("HH:mm"),  
-                        HoraSalida = item.HoraSalida.ToString("HH:mm"),    
-                        Fecha = item.Fecha.ToString("yyyy-MM-dd"),         
+                        HoraEntrada = item.HoraEntrada.ToString("HH:mm"),
+                        HoraSalida = item.HoraSalida.ToString("HH:mm"),
+                        Fecha = item.Fecha.ToString("yyyy-MM-dd"),
                         Usuario = new
                         {
                             item.Usuario.IdUsuario,
@@ -49,7 +49,7 @@ namespace AsistenciasCrud.Server.Controllers
                 }
 
                 responseApi.Correcto = true;
-                responseApi.Valor = listaAsistencia;  
+                responseApi.Valor = listaAsistencia;
             }
             catch (Exception ex)
             {
@@ -63,8 +63,8 @@ namespace AsistenciasCrud.Server.Controllers
         [Route("Buscar/{id}")]
         public async Task<IActionResult> Buscar(int id)
         {
-            var responseApi = new ResponseAPI<dynamic>();  
-            dynamic asistenciaResponse = new ExpandoObject(); 
+            var responseApi = new ResponseAPI<dynamic>();
+            dynamic asistenciaResponse = new ExpandoObject();
 
             try
             {
@@ -108,7 +108,6 @@ namespace AsistenciasCrud.Server.Controllers
         public async Task<IActionResult> Agregar(Asistencia asistencia)
         {
             var responseApi = new ResponseAPI<int>();
-            var Asistencia = new Asistencia();
 
             try
             {

@@ -15,13 +15,13 @@ namespace AsistenciasCrud.Server.Controllers
         {
             _dbContext = dbContext;
         }
-
         [HttpGet("Mostrar")]
         public async Task<IActionResult> Mostrar()
         {
             var usuarios = await _dbContext.Usuarios.ToListAsync();
             return Ok(usuarios);
         }
+      
 
         [HttpGet("Buscar/{id}")]
         public async Task<IActionResult> Buscar(int id)
@@ -33,7 +33,7 @@ namespace AsistenciasCrud.Server.Controllers
         }
 
         [HttpPost("Guardar")]
-        public async Task<IActionResult> Guardar([FromBody] UsuariosDTP usuarioDto)
+        public async Task<IActionResult> Guardar([FromBody] Usuarios usuarioDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest("Modelo de usuario no válido.");
