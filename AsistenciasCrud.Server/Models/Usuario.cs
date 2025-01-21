@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace AsistenciasCrud.Shared
+namespace AsistenciasCrud.Server.Models
 {
     public partial class Usuarios
     {
@@ -23,5 +23,8 @@ namespace AsistenciasCrud.Shared
         [Required(ErrorMessage = "El campo {0} es requerido")]
         [RegularExpression(@"^\d{10}$", ErrorMessage = "El campo {0} debe tener exactamente 10 dígitos numéricos")]
         public string Telefono { get; set; } = null!;
+
+        // Relación con las Asistencias
+        public ICollection<Asistencia> Asistencias { get; set; } = new List<Asistencia>();
     }
 }
